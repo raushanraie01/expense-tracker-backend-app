@@ -2,10 +2,13 @@ import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
 import cors from "cors";
-import path from "path";
+// import path from "path";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import incomeRoutes from "./routes/incomeRoutes.js";
+import expenseRoutes from "./routes/expenseRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+
 const app = express();
 
 //Middlewares  to handle CORS
@@ -20,10 +23,17 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+//Database connection
 connectDB();
 
-app.use("/api/v1/", authRoutes);
-app.use("/api/v1/", incomeRoutes);
+//Routes
+app.use("/api/v1", authRoutes);
+app.use("/api/v1/income", incomeRoutes);
+app.use("/api/v1/expense", expenseRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
+
+//Server Listen
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

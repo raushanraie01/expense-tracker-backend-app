@@ -34,7 +34,7 @@ export async function getAllIncome(req, res) {
       message: "All incomes fetched successfully",
       error: "",
       length: incomes.length,
-      incomes,
+      data: incomes,
     });
   } catch (error) {
     console.log(error);

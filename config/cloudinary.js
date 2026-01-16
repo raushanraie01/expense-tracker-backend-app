@@ -13,7 +13,6 @@ export const uploadOnCloudinary = async (filepath) => {
       folder: "profile-images",
       public_id: uuidv4(),
     });
-    console.log("From Cloudinary:", uploadResult);
     return uploadResult;
   } catch (error) {
     return null;
