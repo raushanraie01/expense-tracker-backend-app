@@ -1,4 +1,5 @@
 import Income from "../models/IncomeModel.js";
+import XLSX from "xlsx";
 
 export async function addIncome(req, res) {
   //here user is logged in , so we have user inside request object
@@ -72,8 +73,6 @@ export async function deleteIncome(req, res) {
       message: "Income deleted successfully",
     });
   } catch (error) {
-    console.error("Delete income error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to delete income",
@@ -82,4 +81,44 @@ export async function deleteIncome(req, res) {
   }
 }
 
-export async function downloadIncomeExcel() {}
+export async function downloadIncomeExcel(req, res) {
+  try {
+    const userId = req.user.id;
+    const income = await Income.find({ userId }).sort({ date: -1 }).lean(); //best practice for excel
+
+    const excelData = income.map((item) => {
+      return {
+        Source: item.source,
+        Amount: item.amount,
+        Notes: item.notes || "",
+        Date: new Date(item.date).toLocaleDateString(),
+      };
+    });
+    // Create worksheet
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    // Create workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Income");
+
+    //  Convert workbook to buffer
+    const excelBuffer = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+    });
+
+    res.setHeader("Content-Disposition", "attachment; filename=income.xlsx");
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    res.status(200).send(excelBuffer);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send income ExcelSheet",
+      error: error.message,
+    });
+  }
+}
