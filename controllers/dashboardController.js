@@ -38,7 +38,7 @@ export async function getDashboardData(req, res) {
     //get total income in last 60 days
     const incomeLast60Days = last60DaysIncomeTransactions.reduce(
       (sum, income) => sum + income.amount,
-      0
+      0,
     );
 
     //get expense transaction in last 30 days
@@ -49,19 +49,19 @@ export async function getDashboardData(req, res) {
     //get total expense in last 30 days
     const expenseLast30Days = last30DaysExpenseTransactions.reduce(
       (sum, expense) => sum + expense.amount,
-      0
+      0,
     );
 
     //Fetch last 5 transactions
     const lastTransactions = [
       ...(await Income.find({ userId }).sort({ date: -1 }).limit(5)).map(
-        (txn) => ({ ...txn.toObject(), type: "income" })
+        (txn) => ({ ...txn.toObject(), type: "income" }),
       ),
       ...(await Expense.find({ userId }).sort({ date: -1 }).limit(5)).map(
         (txn) => ({
           ...txn.toObject(),
           type: "expense",
-        })
+        }),
       ),
     ].sort((a, b) => a.date - b.date); //sort latest first
 
@@ -82,6 +82,7 @@ export async function getDashboardData(req, res) {
         total: incomeLast60Days,
         transactions: last60DaysIncomeTransactions,
       },
+      lastTransactions,
     });
   } catch (error) {
     console.error("Dashboard totals error:", error);

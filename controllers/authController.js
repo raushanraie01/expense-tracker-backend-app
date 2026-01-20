@@ -68,7 +68,7 @@ export async function loginUser(req, res) {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.statusCode(400).json({
+      return res.status(401).json({
         message: "",
         error: "Invalid User Credentials",
       });
@@ -82,7 +82,7 @@ export async function loginUser(req, res) {
     }
     //if exists   --> verify password
     if (!user.comparePassword(password)) {
-      return res.status(400).json({
+      return res.status(401).json({
         message: "",
         error: "Invalid User credentials",
       });
@@ -96,10 +96,8 @@ export async function loginUser(req, res) {
       user,
       token,
     });
-
-    res.send("User logged in");
   } catch (error) {
-    res.status(400).json({
+    res.status(401).json({
       message: "",
       error: error.message,
     });

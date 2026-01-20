@@ -17,7 +17,7 @@ router.post(
   "/upload",
   protectedRoute,
   upload.single("profileImageUrl"),
-  uploadProfileImage
+  uploadProfileImage,
 );
 
 export default router;
