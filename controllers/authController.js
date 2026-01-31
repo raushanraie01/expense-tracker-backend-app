@@ -143,7 +143,7 @@ export async function uploadProfileImage(req, res) {
       {
         profileImageUrl,
       },
-      { new: true }
+      { new: true },
     ).select("-password");
     if (!user) {
       return res.status(301).json({ error: "User not found" });

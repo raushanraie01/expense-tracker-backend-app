@@ -29,7 +29,7 @@ export async function getAllIncome(req, res) {
   try {
     const userId = req.user.id;
     const incomes = await Income.find({ userId }).sort({ date: -1 });
-    console.log(incomes);
+
     res.status(200).json({
       message: "All incomes fetched successfully",
       error: "",
@@ -37,7 +37,6 @@ export async function getAllIncome(req, res) {
       data: incomes,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       message: "",
       error: error.message,
@@ -110,7 +109,7 @@ export async function downloadIncomeExcel(req, res) {
     res.setHeader("Content-Disposition", "attachment; filename=income.xlsx");
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
 
     res.status(200).send(excelBuffer);

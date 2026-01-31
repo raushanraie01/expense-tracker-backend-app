@@ -37,7 +37,7 @@ export async function getDashboardData(req, res) {
     }).sort({ date: -1 });
     //get total income in last 60 days
     const incomeLast60Days = last60DaysIncomeTransactions.reduce(
-      (sum, income) => sum + income.amount,
+      (sum, income) => sum + +income.amount,
       0,
     );
 
@@ -48,7 +48,7 @@ export async function getDashboardData(req, res) {
     }).sort({ date: -1 });
     //get total expense in last 30 days
     const expenseLast30Days = last30DaysExpenseTransactions.reduce(
-      (sum, expense) => sum + expense.amount,
+      (sum, expense) => sum + +expense.amount,
       0,
     );
 
