@@ -31,7 +31,7 @@ const IncomeSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 IncomeSchema.index({ userId: 1, date: -1 });

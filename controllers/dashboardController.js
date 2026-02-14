@@ -8,7 +8,6 @@ export async function getDashboardData(req, res) {
     const userId = req.user._id;
     const userObjectId = new Types.ObjectId(String(userId));
 
-    // 🔹 Total Income
     const incomeResult = await Income.aggregate([
       { $match: { userId: userObjectId } },
       {
@@ -19,7 +18,6 @@ export async function getDashboardData(req, res) {
       },
     ]);
 
-    // 🔹 Total Expense
     const expenseResult = await Expense.aggregate([
       { $match: { userId: userObjectId } },
       {
@@ -30,7 +28,6 @@ export async function getDashboardData(req, res) {
       },
     ]);
 
-    // get income transaction in last 60 days
     const last60DaysIncomeTransactions = await Income.find({
       userId,
       date: { $gte: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000) },
