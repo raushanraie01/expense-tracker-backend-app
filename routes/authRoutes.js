@@ -1,6 +1,7 @@
 import express from "express";
 import {
   loginUser,
+  logoutUser,
   registerUser,
   getUserInfo,
   uploadProfileImage,
@@ -12,7 +13,8 @@ const router = express.Router();
 
 router.route("/register").post(upload.single("profileImageUrl"), registerUser);
 router.route("/login").post(loginUser);
-router.get("/getUser", protectedRoute, getUserInfo);
+router.route("/logout").post(protectedRoute, logoutUser);
+router.get("/getuser", protectedRoute, getUserInfo);
 router.post(
   "/upload",
   protectedRoute,

@@ -5,8 +5,18 @@ import User from "../models/UserModel.js";
 
 import jwt from "jsonwebtoken";
 
-const generateToken = async (id) => {
-  return jwt.sign({ id: id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+const generateAccessAndRefreshToken = async (id) => {
+  try {
+    const user = await User.findById(id);
+
+    let accessToken = user.generateAccessToken();
+    let refreshToken = user.generateRefreshToken();
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+    return { refreshToken, accessToken };
+  } catch (error) {
+    console.log("error in generating  refresh token", error);
+  }
 };
 
 export async function registerUser(req, res) {
@@ -47,12 +57,25 @@ export async function registerUser(req, res) {
       password,
       profileImageUrl,
     });
-    let token = await generateToken(createdUser._id);
-    res.status(200).json({
+    let { refreshToken, accessToken } = await generateAccessAndRefreshToken(
+      createdUser._id,
+    );
+    const { unHashedToken, hashToken, tokenExpiry } =
+      createdUser.generateRandomToken();
+    createdUser.emailVerificationExpiry = tokenExpiry;
+    createdUser.emailVerificationToken = hashToken;
+    await createdUser.save({ validateBeforeSave: false });
+
+    const user = await User.findById(createdUser._id).select(
+      "-password -refreshToken -emailVerificationToken -emailVerificationExpiry",
+    );
+
+    const options = { httpOnly: true, secure: true };
+    res.status(201).cookie("token", accessToken, options).json({
       message: "user created successfully",
       error: "",
-      createdUser,
-      token,
+      user,
+      accessToken,
     });
   } catch (error) {
     res.status(400).json({
@@ -73,7 +96,7 @@ export async function loginUser(req, res) {
         error: "Invalid User Credentials",
       });
     }
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(400).json({
         message: "",
@@ -88,14 +111,21 @@ export async function loginUser(req, res) {
       });
     }
     //correct password  --> generate Token
-    const token = await generateToken(user._id);
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user._id,
+    );
 
-    res.status(200).json({
-      message: "user logged In.",
-      error: "",
-      user,
-      token,
-    });
+    const options = { httpOnly: true, secure: true };
+    res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json({
+        message: "user logged In.",
+        error: "",
+        user,
+        accessToken,
+      });
   } catch (error) {
     res.status(401).json({
       message: "",
@@ -104,9 +134,33 @@ export async function loginUser(req, res) {
   }
 }
 
+export async function logoutUser(req, res) {
+  const user = req?.user;
+  if (!user) {
+    return res.status(500).json({
+      message: "",
+      error: "Server error",
+    });
+  }
+
+  await User.findByIdAndUpdate(
+    user._id,
+    { $set: { refreshToken: "" } },
+    { new: true },
+  );
+
+  const options = { httpOnly: true, secure: true };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json({ status: 200, error: "", message: "User loggedOut successfully" });
+}
+
 export async function getUserInfo(req, res) {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user._id).select("-password");
     if (!user) {
       return res.status(301).json({ error: "User not found" });
     }
@@ -139,7 +193,7 @@ export async function uploadProfileImage(req, res) {
       }
     }
     const user = await User.findByIdAndUpdate(
-      req.user.id,
+      req.user._id,
       {
         profileImageUrl,
       },
