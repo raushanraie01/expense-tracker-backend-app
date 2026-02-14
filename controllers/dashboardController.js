@@ -5,7 +5,7 @@ import { isValidObjectId, Types } from "mongoose";
 //Dashboard Data
 export async function getDashboardData(req, res) {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const userObjectId = new Types.ObjectId(String(userId));
 
     // 🔹 Total Income

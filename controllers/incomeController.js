@@ -2,8 +2,7 @@ import Income from "../models/IncomeModel.js";
 import XLSX from "xlsx";
 
 export async function addIncome(req, res) {
-  //here user is logged in , so we have user inside request object
-  const id = req.user.id;
+  const id = req.user._id;
   const { icon, source, amount, notes, date } = req.body;
   if (!source || !amount) {
     return res.status(400).json({ message: "All fields are required" });
@@ -27,7 +26,7 @@ export async function addIncome(req, res) {
 
 export async function getAllIncome(req, res) {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const incomes = await Income.find({ userId }).sort({ date: -1 });
 
     res.status(200).json({
@@ -46,8 +45,8 @@ export async function getAllIncome(req, res) {
 
 export async function deleteIncome(req, res) {
   try {
+    const userId = req.user._id;
     const incomeId = req.params.id;
-    const userId = req.user.id;
 
     const income = await Income.findById(incomeId);
 
@@ -82,7 +81,7 @@ export async function deleteIncome(req, res) {
 
 export async function downloadIncomeExcel(req, res) {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const income = await Income.find({ userId }).sort({ date: -1 }).lean(); //best practice for excel
 
     const excelData = income.map((item) => {

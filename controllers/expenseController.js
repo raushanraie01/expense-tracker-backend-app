@@ -4,7 +4,7 @@ import XLSX from "xlsx";
 //Add New Expense
 export async function addExpense(req, res) {
   try {
-    const id = req.user.id;
+    const id = req.user._id;
     const { icon, category, amount, notes, date } = req.body;
     if (!category || !amount) {
       return res.status(400).json({ message: "All fields are required" });
@@ -35,7 +35,7 @@ export async function addExpense(req, res) {
 //Get All Expenses
 export async function getAllExpense(req, res) {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const expenses = await Expense.find({ userId }).sort({ date: -1 });
     res.status(200).json({
       message: "All incomes fetched successfully",
@@ -55,8 +55,8 @@ export async function getAllExpense(req, res) {
 //Delete Specific Expense
 export async function deleteExpense(req, res) {
   try {
+    const userId = req.user._id;
     const expenseId = req.params.id;
-    const userId = req.user.id;
 
     const expense = await Expense.findById(expenseId);
 
@@ -92,7 +92,7 @@ export async function deleteExpense(req, res) {
 //Download ExcelSheet of Expense
 export async function downloadExpenseExcel(req, res) {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const expense = await Expense.find({ userId }).sort({ date: -1 }).lean(); //best practice for excel
 
     const excelData = expense.map((item) => {
@@ -119,7 +119,7 @@ export async function downloadExpenseExcel(req, res) {
     res.setHeader("Content-Disposition", "attachment; filename=expense.xlsx");
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
 
     res.status(200).send(excelBuffer);

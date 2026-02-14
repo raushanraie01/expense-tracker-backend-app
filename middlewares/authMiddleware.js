@@ -6,13 +6,14 @@ export async function protectedRoute(req, res, next) {
     let token =
       req.cookies?.accessToken ||
       req.headers.authorization?.replace("Bearer ", "");
-    console.log("token", token);
+
     if (!token) {
       res.status(404).json({
         error: "",
         message: "LoginedIn first",
       });
     }
+
     const decodedUser = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
     if (!decodedUser) {
