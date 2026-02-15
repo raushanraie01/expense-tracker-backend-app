@@ -66,8 +66,7 @@ export async function deleteExpense(req, res) {
         message: "Income not found",
       });
     }
-
-    if (expense.userId.toString() !== userId) {
+    if (expense.userId.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to delete this income",

@@ -49,7 +49,7 @@ export async function deleteIncome(req, res) {
     const incomeId = req.params.id;
 
     const income = await Income.findById(incomeId);
-
+    console.log(income.userId, userId);
     if (!income) {
       return res.status(404).json({
         success: false,
@@ -57,7 +57,7 @@ export async function deleteIncome(req, res) {
       });
     }
 
-    if (income.userId.toString() !== userId) {
+    if (income.userId.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to delete this income",
