@@ -107,7 +107,9 @@ export async function loginUser(req, res) {
       });
     }
     //if exists   --> verify password
-    if (!user.comparePassword(password)) {
+    let isCorrectPassword = await user.comparePassword(password);
+
+    if (!isCorrectPassword) {
       return res.status(401).json({
         message: "",
         error: "Invalid User credentials",
