@@ -1,8 +1,7 @@
 import { uploadOnCloudinary } from "../config/cloudinary.js";
-import upload from "../middlewares/uploadMiddleware.js";
+// import upload from "../middlewares/uploadMiddleware.js";
 import fs from "fs";
 import User from "../models/UserModel.js";
-
 import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (id) => {
@@ -133,6 +132,47 @@ export async function loginUser(req, res) {
     });
   }
 }
+
+export const refreshAccessToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Refresh token missing" });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+    const user = await User.findById(decoded._id);
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+      await generateAccessAndRefreshToken(user._id);
+
+    user.refreshToken = newRefreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    };
+
+    return res
+      .status(200)
+      .cookie("accessToken", newAccessToken, options)
+      .cookie("refreshToken", newRefreshToken, options)
+      .json({
+        message: "Access token refreshed",
+        newAccessToken,
+        newRefreshToken,
+      });
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid refresh token" });
+  }
+};
 
 export async function logoutUser(req, res) {
   const user = req?.user;

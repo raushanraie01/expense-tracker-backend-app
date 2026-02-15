@@ -4,6 +4,7 @@ import {
   logoutUser,
   registerUser,
   getUserInfo,
+  refreshAccessToken,
   uploadProfileImage,
 } from "../controllers/authController.js";
 import upload from "../middlewares/uploadMiddleware.js";
@@ -15,6 +16,7 @@ router.route("/register").post(upload.single("profileImageUrl"), registerUser);
 router.route("/login").post(loginUser);
 router.route("/logout").post(protectedRoute, logoutUser);
 router.get("/getuser", protectedRoute, getUserInfo);
+router.route("/refresh").post(refreshAccessToken);
 router.post(
   "/upload",
   protectedRoute,
