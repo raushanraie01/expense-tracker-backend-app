@@ -70,7 +70,7 @@ export async function registerUser(req, res) {
       "-password -refreshToken -emailVerificationToken -emailVerificationExpiry",
     );
 
-    const options = { httpOnly: true, secure: true };
+    const options = { httpOnly: true, secure: true, sameSite: "None" };
     res.status(201).cookie("token", accessToken, options).json({
       message: "user created successfully",
       error: "",
@@ -115,7 +115,7 @@ export async function loginUser(req, res) {
       user._id,
     );
     const loggedInUser = await User.findById(user._id).select("-password");
-    const options = { httpOnly: true, secure: true };
+    const options = { httpOnly: true, secure: true, sameSite: "None" };
     res
       .status(200)
       .cookie("accessToken", accessToken, options)
@@ -149,7 +149,7 @@ export async function logoutUser(req, res) {
     { new: true },
   );
 
-  const options = { httpOnly: true, secure: true };
+  const options = { httpOnly: true, secure: true, sameSite: "None" };
 
   return res
     .status(200)

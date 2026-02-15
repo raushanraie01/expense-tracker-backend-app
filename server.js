@@ -31,6 +31,9 @@ app.use(cookieParser());
 connectDB();
 
 //Routes
+app.get("/", (req, res) => {
+  res.json({ message: "Backend health is fine" });
+});
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/income", incomeRoutes);
 app.use("/api/v1/expense", expenseRoutes);
