@@ -70,12 +70,16 @@ export async function registerUser(req, res) {
     );
 
     const options = { httpOnly: true, secure: true, sameSite: "None" };
-    res.status(201).cookie("token", accessToken, options).json({
-      message: "user created successfully",
-      error: "",
-      user,
-      accessToken,
-    });
+    res
+      .status(201)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json({
+        message: "user created successfully",
+        error: "",
+        user,
+        accessToken,
+      });
   } catch (error) {
     res.status(400).json({
       message: "",
